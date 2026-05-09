@@ -1,7 +1,5 @@
--- ============================================================
 --  SmartEdu — MySQL Database Schema
 --  Run: mysql -u root -p smartedu < schema.sql
--- ============================================================
 
 CREATE DATABASE IF NOT EXISTS smartedu
   CHARACTER SET utf8mb4
@@ -9,7 +7,7 @@ CREATE DATABASE IF NOT EXISTS smartedu
 
 USE smartedu;
 
--- ── 1. Users ──────────────────────────────────────────────────────────────
+-- 1. Users
 CREATE TABLE Users (
     id          INT          NOT NULL AUTO_INCREMENT,
     name        VARCHAR(100) NOT NULL,
@@ -24,7 +22,7 @@ CREATE TABLE Users (
 ) ENGINE=InnoDB;
 
 
--- ── 2. Courses ────────────────────────────────────────────────────────────
+-- 2. Courses 
 CREATE TABLE Courses (
     id          INT          NOT NULL AUTO_INCREMENT,
     teacher_id  INT          NOT NULL,
@@ -40,7 +38,7 @@ CREATE TABLE Courses (
 ) ENGINE=InnoDB;
 
 
--- ── 3. Enrollments ────────────────────────────────────────────────────────
+-- 3. Enrollments 
 --  Junction table: which students are in which courses
 CREATE TABLE Enrollments (
     id           INT      NOT NULL AUTO_INCREMENT,
@@ -60,7 +58,7 @@ CREATE TABLE Enrollments (
 ) ENGINE=InnoDB;
 
 
--- ── 4. Lessons ────────────────────────────────────────────────────────────
+--4. Lessons 
 CREATE TABLE Lessons (
     id          INT          NOT NULL AUTO_INCREMENT,
     course_id   INT          NOT NULL,
@@ -76,7 +74,7 @@ CREATE TABLE Lessons (
 ) ENGINE=InnoDB;
 
 
--- ── 5. AI_Summaries ───────────────────────────────────────────────────────
+-- 5. AI_Summaries
 CREATE TABLE AI_Summaries (
     id            INT      NOT NULL AUTO_INCREMENT,
     lesson_id     INT      NOT NULL,
@@ -92,7 +90,7 @@ CREATE TABLE AI_Summaries (
 ) ENGINE=InnoDB;
 
 
--- ── 6. Progress_Tracking ──────────────────────────────────────────────────
+-- 6. Progress_Tracking
 CREATE TABLE Progress_Tracking (
     id          INT      NOT NULL AUTO_INCREMENT,
     student_id  INT      NOT NULL,
@@ -115,9 +113,9 @@ CREATE TABLE Progress_Tracking (
 ) ENGINE=InnoDB;
 
 
--- ============================================================
---  SEED DATA  (for development / demo)
--- ============================================================
+
+--  SEED DATA  (for demo)
+
 
 -- Passwords are "password123" — bcrypt hash (cost 12)
 INSERT INTO Users (name, email, password, role) VALUES
@@ -154,10 +152,7 @@ INSERT INTO Progress_Tracking (student_id, lesson_id, status) VALUES
   (4, 1, 'completed');
 
 
--- ============================================================
---  SAMPLE COMPLEX QUERIES  (satisfies DBS rubric)
--- ============================================================
-
+--  SAMPLE COMPLEX QUERIES 
 -- Q1: Student dashboard — name + course + lesson + summary + status
 -- (4-table JOIN)
 SELECT
