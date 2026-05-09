@@ -1,12 +1,11 @@
--- ============================================================
 --  SmartEdu v2 — Additional Tables
 --  Run AFTER the original schema.sql:
 --  mysql -u root -p smartedu < schema_v2.sql
--- ============================================================
+
 
 USE smartedu;
 
--- ── 7. Lesson_Materials ───────────────────────────────────────────────────
+--  7. Lesson_Materials
 -- Teachers attach notes, slides, question sheets, links, etc.
 CREATE TABLE Lesson_Materials (
     id            INT           NOT NULL AUTO_INCREMENT,
@@ -28,7 +27,7 @@ CREATE TABLE Lesson_Materials (
 ) ENGINE=InnoDB;
 
 
--- ── 8. Quizzes ───────────────────────────────────────────────────────────
+-- 8. Quizzes
 -- One row per quiz attempt — a student can take multiple quizzes per lesson
 CREATE TABLE Quizzes (
     id              INT      NOT NULL AUTO_INCREMENT,
@@ -49,7 +48,7 @@ CREATE TABLE Quizzes (
 ) ENGINE=InnoDB;
 
 
--- ── 9. Quiz_Questions ────────────────────────────────────────────────────
+-- 9. Quiz_Questions 
 -- 5 MCQ questions per quiz, each with 4 options
 CREATE TABLE Quiz_Questions (
     id              INT         NOT NULL AUTO_INCREMENT,
@@ -72,9 +71,7 @@ CREATE TABLE Quiz_Questions (
 ) ENGINE=InnoDB;
 
 
--- ============================================================
---  SAMPLE COMPLEX QUERIES — Quiz & Materials (for DBS rubric)
--- ============================================================
+--  SAMPLE COMPLEX QUERIES — Quiz & Materials 
 
 -- Q4: Student quiz history — all attempts with score and lesson title
 SELECT
