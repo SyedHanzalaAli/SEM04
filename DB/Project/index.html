@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartEdu v2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f7f6f3;--bg2:#eeecea;--bg3:#e4e2de;
+  --surface:#fff;--surface2:#f4f3f0;
+  --border:#d8d6d1;--border2:#c8c6c0;
+  --text:#1a1917;--text2:#5c5a55;--text3:#8a8780;
+  --accent:#2563eb;--accent-bg:#eff4ff;--accent-border:#bfcffd;
+  --green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;
+  --amber:#b45309;--amber-bg:#fffbeb;--amber-border:#fde68a;
+  --red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;--purple-border:#ddd6fe;
+  --teal:#0d9488;--teal-bg:#f0fdfa;--teal-border:#99f6e4;
+  --radius:10px;--radius-lg:14px;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+  font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:var(--bg)
+}
+input,select,button,textarea{font-family:inherit}
+a{color:var(--accent)}
+
+/* ── Screens ──────────────────────────────────────────────── */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── Nav ───────────────────────────────────────────────────── */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:54px;
+  background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.brand{font-size:18px;font-weight:600;letter-spacing:-.4px}
+.brand span{color:var(--accent)}
+.user-chip{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 5px;
+  background:var(--surface2);border-radius:999px;border:1px solid var(--border)}
+.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:600}
+.av-t{background:var(--amber-bg);color:var(--amber)}
+.av-s{background:var(--green-bg);color:var(--green)}
+
+/* ── Tabs ──────────────────────────────────────────────────── */
+.tabbar{display:flex;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border);gap:2px;overflow-x:auto}
+.tab{padding:13px 14px;font-size:14px;color:var(--text3);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;white-space:nowrap}
+.tab:hover{color:var(--text2)}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ── Page ──────────────────────────────────────────────────── */
+.page{flex:1;padding:24px;max-width:820px;width:100%;margin:0 auto}
+.tc{display:none}.tc.on{display:block}
+.page-title{font-size:21px;font-weight:600;letter-spacing:-.3px;margin-bottom:3px}
+.page-sub{font-size:14px;color:var(--text2);margin-bottom:22px}
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;box-shadow:var(--shadow)}
+.card+.card,.card+.lesson-card{margin-top:10px}
+.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow)}
+.stat-n{font-size:26px;font-weight:600;letter-spacing:-.4px}
+.stat-l{font-size:13px;color:var(--text3);margin-top:2px}
+
+/* ── Forms ─────────────────────────────────────────────────── */
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 12px;border:1px solid var(--border);
+  border-radius:var(--radius);font-size:14px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+.fg textarea{resize:vertical;min-height:90px}
+.err-msg{font-size:12px;color:var(--red);margin-top:4px;display:none}
+.err-msg.on{display:block}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);
+  font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);transition:background .12s;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:#1d4ed8;border-color:#1d4ed8}
+.btn-sm{padding:5px 11px;font-size:13px}
+.btn-ghost{border-color:transparent;background:transparent}
+.btn-ghost:hover{background:var(--surface2);border-color:var(--border)}
+.btn-success{background:var(--green-bg);border-color:var(--green-border);color:var(--green);cursor:default}
+.btn-teal{background:var(--teal-bg);border-color:var(--teal-border);color:var(--teal)}
+.btn-teal:hover{background:#ccfbf1}
+
+/* ── Badges ────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600}
+.b-done{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.b-prog{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.b-none{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.b-ai{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+.b-teacher{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.b-student{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.b-notes{background:#fef9c3;color:#854d0e;border:1px solid #fef08a}
+.b-slides{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
+.b-questions{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.b-link{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-border)}
+.b-other{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+
+/* ── Alerts ────────────────────────────────────────────────── */
+.alert{padding:11px 14px;border-radius:var(--radius);font-size:14px;margin-bottom:14px;display:none;border-width:1px;border-style:solid}
+.alert.on{display:block}
+.alert-ok{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+.alert-err{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.alert-info{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}
+
+/* ── Spinner ────────────────────────────────────────────────── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0}
+.loading-row{display:flex;align-items:center;gap:10px;color:var(--text2);font-size:14px;padding:18px 0}
+
+/* ── Progress bar ───────────────────────────────────────────── */
+.pbar-wrap{height:5px;background:var(--bg3);border-radius:999px;overflow:hidden;margin-top:6px}
+.pbar{height:100%;background:var(--green);border-radius:999px;transition:width .4s}
+
+/* ── AI box ─────────────────────────────────────────────────── */
+.ai-box{background:var(--purple-bg);border:1px solid var(--purple-border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
+.ai-label{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);flex-shrink:0}
+
+/* ── Lesson rows ────────────────────────────────────────────── */
+.lesson-row{padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer}
+.lesson-row:last-child{border-bottom:none}
+.lesson-row:hover .lesson-title{color:var(--accent)}
+.lesson-title{font-size:15px;font-weight:500;flex:1}
+.lesson-sub{font-size:13px;color:var(--text3);margin-top:2px}
+
+/* ── Section header ─────────────────────────────────────────── */
+.sh{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+
+/* ── Video wrap ─────────────────────────────────────────────── */
+.video-wrap{position:relative;padding-top:56.25%;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);background:#000;margin-bottom:16px}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+
+/* ── Login ──────────────────────────────────────────────────── */
+.login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px}
+.login-card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.role-btn{padding:9px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);font-size:14px;cursor:pointer;color:var(--text2);font-weight:500;transition:all .15s}
+.role-btn.sel{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+
+/* ── Empty state ────────────────────────────────────────────── */
+.empty{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-icon{font-size:32px;margin-bottom:10px}
+
+/* ══════════════════════════════════════════
+   QUIZ STYLES
+══════════════════════════════════════════ */
+.quiz-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px}
+.quiz-hdr{padding:16px 20px;background:var(--teal-bg);border-bottom:1px solid var(--teal-border);display:flex;align-items:center;justify-content:space-between}
+.quiz-hdr-title{font-size:15px;font-weight:600;color:var(--teal)}
+.quiz-score-big{font-size:22px;font-weight:600;text-align:center;margin:16px 0 4px}
+.quiz-score-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:16px}
+
+.q-card{padding:18px 20px;border-bottom:1px solid var(--border)}
+.q-card:last-child{border-bottom:none}
+.q-num{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.q-text{font-size:15px;font-weight:500;margin-bottom:14px;line-height:1.5}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.option{padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);
+  font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;
+  background:var(--surface);transition:all .15s;text-align:left;width:100%}
+.option:hover{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+.option.selected{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);font-weight:500}
+.option.correct{border-color:var(--green);background:var(--green-bg);color:var(--green);font-weight:500;cursor:default}
+.option.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red);font-weight:500;cursor:default}
+.option.neutral{cursor:default;opacity:.6}
+.opt-key{width:22px;height:22px;border-radius:5px;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.quiz-actions{padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* History list */
+.history-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.history-row:last-child{border-bottom:none}
+.score-pill{padding:3px 10px;border-radius:999px;font-size:13px;font-weight:600}
+.score-hi{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.score-mid{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.score-lo{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+
+/* ══════════════════════════════════════════
+   MATERIALS STYLES
+══════════════════════════════════════════ */
+.mat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:0;overflow:hidden;margin-bottom:10px}
+.mat-hdr{padding:14px 16px;display:flex;align-items:flex-start;gap:12px}
+.mat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.mat-body{padding:0 16px 14px;font-size:14px;color:var(--text2);line-height:1.7;border-top:1px solid var(--border);padding-top:12px;white-space:pre-wrap;word-break:break-word}
+.type-select{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.type-btn{padding:8px 6px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .15s;color:var(--text2)}
+.type-btn.sel{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ══════════════════════════════════════════════════ -->
+<div class="screen active" id="s-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="brand" style="font-size:22px;margin-bottom:3px">Smart<span>Edu</span></div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px">Sign in to your account</p>
+      <div class="alert alert-err" id="l-alert"></div>
+      <div class="fg"><label>Email</label><input type="email" id="l-email" placeholder="you@university.edu"><div class="err-msg" id="e-email">Valid email required</div></div>
+      <div class="fg"><label>Password</label><input type="password" id="l-pw" placeholder="Min. 6 characters"><div class="err-msg" id="e-pw">Min. 6 characters</div></div>
+      <div class="fg"><label>I am a</label><div class="role-grid"><button class="role-btn sel" id="rb-t" onclick="selRole('teacher')">Teacher</button><button class="role-btn" id="rb-s" onclick="selRole('student')">Student</button></div></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:12px" id="login-btn" onclick="doLogin()">Sign in</button>
+      <div style="text-align:center;font-size:13px;color:var(--text3)">No account? <a href="#" onclick="show('s-register')">Register</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REGISTER ═══════════════════════════════════════════════ -->
+<div class="screen" id="s-register">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="brand" style="font-size:22px;margin-bottom:3px">Smart<span>Edu</span></div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px">Create your account</p>
+      <div class="alert alert-err" id="r-alert"></div>
+      <div class="fg"><label>Full name</label><input type="text" id="r-name" placeholder="Your name"><div class="err-msg" id="e-name">Required</div></div>
+      <div class="fg"><label>Email</label><input type="email" id="r-email" placeholder="you@university.edu"><div class="err-msg" id="e-remail">Valid email required</div></div>
+      <div class="fg"><label>Password</label><input type="password" id="r-pw" placeholder="Min. 6 characters"><div class="err-msg" id="e-rpw">Min. 6 characters</div></div>
+      <div class="fg"><label>I am a</label><div class="role-grid"><button class="role-btn sel" id="rb2-t" onclick="selRole2('teacher')">Teacher</button><button class="role-btn" id="rb2-s" onclick="selRole2('student')">Student</button></div></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:12px" id="reg-btn" onclick="doRegister()">Create account</button>
+      <div style="text-align:center;font-size:13px;color:var(--text3)">Have an account? <a href="#" onclick="show('s-login')">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TEACHER DASHBOARD ═══════════════════════════════════════ -->
+<div class="screen" id="s-teacher">
+  <nav class="nav">
+    <div style="display:flex;align-items:center;gap:10px"><div class="brand">Smart<span>Edu</span></div><span class="badge b-teacher">Teacher</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="user-chip"><div class="av av-t" id="t-av"></div><span style="font-size:13px;font-weight:500" id="t-name"></span></div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Sign out</button>
+    </div>
+  </nav>
+  <div class="tabbar" id="t-tabbar">
+    <div class="tab on"  onclick="tTab(0)">Overview</div>
+    <div class="tab"     onclick="tTab(1)">Post Lesson</div>
+    <div class="tab"     onclick="tTab(2)">My Lessons</div>
+    <div class="tab"     onclick="tTab(3)">📎 Materials</div>
+  </div>
+  <!-- Tab 0: Overview -->
+  <div class="tc on" id="tt-0">
+    <div class="page">
+      <div class="page-title" id="t-welcome">Dashboard</div>
+      <p class="page-sub">Your courses and lessons at a glance.</p>
+      <div class="card-grid">
+        <div class="stat-card"><div class="stat-n" id="ts-c">—</div><div class="stat-l">Courses</div></div>
+        <div class="stat-card"><div class="stat-n" id="ts-l">—</div><div class="stat-l">Lessons</div></div>
+        <div class="stat-card"><div class="stat-n" id="ts-s">—</div><div class="stat-l">AI summaries</div></div>
+      </div>
+      <div class="sh">Recent lessons</div>
+      <div class="card" id="t-recent"><div class="loading-row"><div class="spinner"></div>Loading...</div></div>
+    </div>
+  </div>
+  <!-- Tab 1: Post Lesson -->
+  <div class="tc" id="tt-1">
+    <div class="page">
+      <div class="page-title">Post a new lesson</div>
+      <p class="page-sub">Paste a YouTube link — AI summary generates automatically.</p>
+      <div class="alert alert-ok" id="post-ok"></div>
+      <div class="alert alert-err" id="post-err"></div>
+      <div class="card">
+        <div class="fg"><label>Course</label><select id="p-course"></select><div class="err-msg" id="e-pc">Select a course</div></div>
+        <div class="fg"><label>Lesson title</label><input type="text" id="p-title" placeholder="e.g. Introduction to Recursion"><div class="err-msg" id="e-pt">Required</div></div>
+        <div class="fg"><label>YouTube URL</label><input type="url" id="p-url" placeholder="https://www.youtube.com/watch?v=..."><div class="err-msg" id="e-pu">Valid YouTube URL required</div></div>
+        <button class="btn btn-primary" id="post-btn" onclick="postLesson()">Post lesson + Generate AI summary</button>
+      </div>
+    </div>
+  </div>
+  <!-- Tab 2: My Lessons -->
+  <div class="tc" id="tt-2">
+    <div class="page">
+      <div class="page-title">My Lessons</div>
+      <p class="page-sub">All lessons across your courses.</p>
+      <div id="t-llist"><div class="loading-row"><div class="spinner"></div>Loading...</div></div>
+    </div>
+  </div>
+  <!-- Tab 3: Materials -->
+  <div class="tc" id="tt-3">
+    <div class="page">
+      <div class="page-title">Lesson Materials</div>
+      <p class="page-sub">Post notes, slides, question banks, or links for any lesson.</p>
+      <div class="alert alert-ok" id="mat-ok"></div>
+      <div class="alert alert-err" id="mat-err"></div>
+      <div class="card" style="margin-bottom:20px">
+        <div style="font-size:15px;font-weight:500;margin-bottom:14px">Add material</div>
+        <div class="fg"><label>Lesson</label><select id="m-lesson"><option value="">Select lesson...</option></select><div class="err-msg" id="e-ml">Select a lesson</div></div>
+        <div class="fg"><label>Material type</label>
+          <div class="type-select">
+            <button class="type-btn sel" onclick="selType('notes',this)">📝 Notes</button>
+            <button class="type-btn" onclick="selType('slides',this)">📊 Slides</button>
+            <button class="type-btn" onclick="selType('questions',this)">❓ Questions</button>
+            <button class="type-btn" onclick="selType('link',this)">🔗 Link</button>
+            <button class="type-btn" onclick="selType('other',this)">📎 Other</button>
+          </div>
+        </div>
+        <div class="fg"><label>Title</label><input type="text" id="m-title" placeholder="e.g. Week 3 Lecture Notes"><div class="err-msg" id="e-mt">Required</div></div>
+        <div id="m-content-wrap" class="fg"><label>Content</label><textarea id="m-content" placeholder="Paste your notes, questions, or slide text here..."></textarea><div class="err-msg" id="e-mc">Content required</div></div>
+        <div id="m-url-wrap" class="fg" style="display:none"><label>URL</label><input type="url" id="m-url" placeholder="https://..."><div class="err-msg" id="e-mu">Valid URL required</div></div>
+        <button class="btn btn-primary" id="mat-btn" onclick="postMaterial()">Post material</button>
+      </div>
+      <div class="sh">Posted materials</div>
+      <div id="t-matlist"><div class="loading-row"><div class="spinner"></div>Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STUDENT DASHBOARD ═══════════════════════════════════════ -->
+<div class="screen" id="s-student">
+  <nav class="nav">
+    <div style="display:flex;align-items:center;gap:10px"><div class="brand">Smart<span>Edu</span></div><span class="badge b-student">Student</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="user-chip"><div class="av av-s" id="s-av"></div><span style="font-size:13px;font-weight:500" id="s-name"></span></div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Sign out</button>
+    </div>
+  </nav>
+  <div class="tabbar" id="s-tabbar">
+    <div class="tab on" onclick="sTab(0)">My Courses</div>
+    <div class="tab"    onclick="sTab(1)">Progress</div>
+    <div class="tab"    onclick="sTab(2)">🎯 Quiz Results</div>
+  </div>
+  <div class="tc on" id="st-0"><div class="page"><div class="page-title">My Courses</div><p class="page-sub">Click a lesson to watch, read the AI summary, take a quiz, and view materials.</p><div id="s-clist"><div class="loading-row"><div class="spinner"></div>Loading...</div></div></div></div>
+  <div class="tc" id="st-1">
+    <div class="page">
+      <div class="card-grid">
+        <div class="stat-card"><div class="stat-n" id="p-done">—</div><div class="stat-l">Completed</div></div>
+        <div class="stat-card"><div class="stat-n" id="p-tot">—</div><div class="stat-l">Total lessons</div></div>
+        <div class="stat-card"><div class="stat-n" id="p-pct">—</div><div class="stat-l">Completion %</div></div>
+      </div>
+      <div class="sh">Lesson breakdown</div>
+      <div class="card" style="padding:0 20px" id="s-plist"><div class="loading-row"><div class="spinner"></div>Loading...</div></div>
+    </div>
+  </div>
+  <div class="tc" id="st-2">
+    <div class="page">
+      <div class="card-grid">
+        <div class="stat-card"><div class="stat-n" id="q-taken">—</div><div class="stat-l">Quizzes taken</div></div>
+        <div class="stat-card"><div class="stat-n" id="q-avg">—</div><div class="stat-l">Avg. score</div></div>
+        <div class="stat-card"><div class="stat-n" id="q-best">—</div><div class="stat-l">Best score</div></div>
+      </div>
+      <div class="sh">All quiz attempts</div>
+      <div class="card" style="padding:0 20px" id="q-history"><div class="loading-row"><div class="spinner"></div>Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LESSON VIEW ══════════════════════════════════════════════ -->
+<div class="screen" id="s-lesson">
+  <nav class="nav">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-ghost btn-sm" onclick="backToStudent()">← Back</button>
+      <div class="brand">Smart<span>Edu</span></div>
+    </div>
+    <div class="user-chip"><div class="av av-s" id="l-av"></div><span style="font-size:13px;font-weight:500" id="l-uname"></span></div>
+  </nav>
+  <div class="tabbar" id="l-tabbar">
+    <div class="tab on"  onclick="lTab(0)">📹 Lesson</div>
+    <div class="tab"     onclick="lTab(1)">🎯 Quiz</div>
+    <div class="tab"     onclick="lTab(2)">📎 Materials</div>
+  </div>
+  <!-- Lesson tab -->
+  <div class="tc on" id="lt-0"><div class="page" style="max-width:680px" id="l-content"></div></div>
+  <!-- Quiz tab -->
+  <div class="tc" id="lt-1"><div class="page" id="quiz-panel"></div></div>
+  <!-- Materials tab -->
+  <div class="tc" id="lt-2"><div class="page" id="mat-panel"></div></div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════════════ */
+const API = 'http://localhost:5000/api';
+
+/* ════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════ */
+let TOKEN = null, USER = null, ROLE = 'teacher', ROLE2 = 'teacher';
+let CURRENT_LESSON_ID = null;
+let CURRENT_QUIZ = null;
+let CURRENT_ANSWERS = {};
+let SELECTED_MAT_TYPE = 'notes';
+
+/* ════════════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════════════ */
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const YT_RE=/youtube\.com\/watch\?v=|youtu\.be\/[\w\-]{11}/;
+
+function setAlert(id,msg){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.classList.add('on')}
+function clearAlert(id){const el=document.getElementById(id);if(el)el.classList.remove('on')}
+function setErr(id){const el=document.getElementById(id);if(el)el.classList.add('on')}
+function clearErrs(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('on')})}
+function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
+
+async function api(method,path,body){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(TOKEN)opts.headers['Authorization']=`Bearer ${TOKEN}`;
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(API+path,opts);
+  const data=await res.json();
+  if(!res.ok)throw{status:res.status,data};
+  return data;
+}
+
+function matBadge(t){const m={notes:'b-notes',slides:'b-slides',questions:'b-questions',link:'b-link',other:'b-other'};return m[t]||'b-other'}
+function matIcon(t){const m={notes:'📝',slides:'📊',questions:'❓',link:'🔗',other:'📎'};return m[t]||'📎'}
+function scorePill(pct){const c=pct>=80?'score-hi':pct>=50?'score-mid':'score-lo';return `<span class="score-pill ${c}">${pct}%</span>`}
+
+/* ════════════════════════════════════════════════════════
+   AUTH
+════════════════════════════════════════════════════════ */
+function selRole(r){ROLE=r;document.getElementById('rb-t').classList.toggle('sel',r==='teacher');document.getElementById('rb-s').classList.toggle('sel',r==='student')}
+function selRole2(r){ROLE2=r;document.getElementById('rb2-t').classList.toggle('sel',r==='teacher');document.getElementById('rb2-s').classList.toggle('sel',r==='student')}
+
+async function doLogin(){
+  clearErrs(['e-email','e-pw']);clearAlert('l-alert');
+  const email=document.getElementById('l-email').value.trim();
+  const pw=document.getElementById('l-pw').value;
+  let ok=true;
+  if(!EMAIL_RE.test(email)){setErr('e-email');ok=false}
+  if(pw.length<6){setErr('e-pw');ok=false}
+  if(!ok)return;
+  const btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='Signing in...';
+  try{const d=await api('POST','/auth/login',{email,password:pw});TOKEN=d.token;USER=d.user;navAfterLogin()}
+  catch(e){setAlert('l-alert',e.data?.error||'Invalid credentials')}
+  finally{btn.disabled=false;btn.textContent='Sign in'}
+}
+
+async function doRegister(){
+  clearErrs(['e-name','e-remail','e-rpw']);clearAlert('r-alert');
+  const name=document.getElementById('r-name').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const pw=document.getElementById('r-pw').value;
+  let ok=true;
+  if(!name){setErr('e-name');ok=false}
+  if(!EMAIL_RE.test(email)){setErr('e-remail');ok=false}
+  if(pw.length<6){setErr('e-rpw');ok=false}
+  if(!ok)return;
+  const btn=document.getElementById('reg-btn');btn.disabled=true;btn.textContent='Creating...';
+  try{const d=await api('POST','/auth/register',{name,email,password:pw,role:ROLE2});TOKEN=d.token;USER=d.user;navAfterLogin()}
+  catch(e){setAlert('r-alert',e.data?.error||'Registration failed')}
+  finally{btn.disabled=false;btn.textContent='Create account'}
+}
+
+function logout(){TOKEN=null;USER=null;show('s-login')}
+
+function navAfterLogin(){
+  if(USER.role==='teacher'){
+    document.getElementById('t-name').textContent=USER.name;
+    document.getElementById('t-av').textContent=initials(USER.name);
+    const hr=new Date().getHours();
+    document.getElementById('t-welcome').textContent=(hr<12?'Good morning':hr<17?'Good afternoon':'Good evening')+', '+USER.name.split(' ')[0];
+    show('s-teacher');loadTeacherOverview();loadCourseSelect();loadTeacherLessons();loadTeacherMaterials();
+  } else {
+    document.getElementById('s-name').textContent=USER.name;
+    document.getElementById('s-av').textContent=initials(USER.name);
+    document.getElementById('l-av').textContent=initials(USER.name);
+    document.getElementById('l-uname').textContent=USER.name;
+    show('s-student');loadStudentCourses();loadProgressStats();loadProgressList();loadQuizStats();loadQuizHistory();
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   TAB SWITCHING
+════════════════════════════════════════════════════════ */
+function tTab(i){
+  document.querySelectorAll('#t-tabbar .tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  [0,1,2,3].forEach(j=>document.getElementById('tt-'+j).classList.toggle('on',i===j));
+  if(i===0)loadTeacherOverview();
+  if(i===2)loadTeacherLessons();
+  if(i===3){loadTeacherMaterials();loadLessonSelectForMaterials()}
+}
+function sTab(i){
+  document.querySelectorAll('#s-tabbar .tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  [0,1,2].forEach(j=>document.getElementById('st-'+j).classList.toggle('on',i===j));
+  if(i===1){loadProgressStats();loadProgressList()}
+  if(i===2){loadQuizStats();loadQuizHistory()}
+}
+function lTab(i){
+  document.querySelectorAll('#l-tabbar .tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  [0,1,2].forEach(j=>document.getElementById('lt-'+j).classList.toggle('on',i===j));
+  if(i===1)loadQuizPanel();
+  if(i===2)loadMaterialsPanel();
+}
+
+/* ════════════════════════════════════════════════════════
+   TEACHER — OVERVIEW
+════════════════════════════════════════════════════════ */
+async function loadTeacherOverview(){
+  try{
+    const[cd,ld]=await Promise.all([api('GET','/courses'),api('GET','/lessons')]);
+    const l=ld.lessons||[];
+    document.getElementById('ts-c').textContent=(cd.courses||[]).length;
+    document.getElementById('ts-l').textContent=l.length;
+    document.getElementById('ts-s').textContent=l.filter(x=>x.has_summary).length;
+    const el=document.getElementById('t-recent');
+    el.innerHTML=l.slice(0,4).map(x=>`
+      <div class="lesson-row" style="cursor:default">
+        <div style="flex:1"><div class="lesson-title">${esc(x.title)}</div><div class="lesson-sub">${esc(x.course_title||'')}</div></div>
+        ${x.has_summary?'<span class="badge b-ai">AI Ready</span>':'<span class="badge b-none">Pending</span>'}
+      </div>`).join('')||'<div class="empty"><p>No lessons yet.</p></div>';
+  }catch(e){document.getElementById('t-recent').innerHTML='<p style="color:var(--red);font-size:14px">Failed to load. Is Flask running?</p>'}
+}
+
+async function loadCourseSelect(){
+  try{
+    const d=await api('GET','/courses');
+    const mine=(d.courses||[]).filter(c=>c.teacher_id===USER.id);
+    document.getElementById('p-course').innerHTML=mine.map(c=>`<option value="${c.id}">${esc(c.title)}</option>`).join('')||'<option value="">No courses yet</option>';
+  }catch(e){}
+}
+
+async function loadTeacherLessons(){
+  const el=document.getElementById('t-llist');
+  try{
+    const d=await api('GET','/lessons');
+    const lessons=d.lessons||[];
+    el.innerHTML=lessons.map(l=>`
+      <div class="card" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div style="flex:1">
+            <div style="font-size:15px;font-weight:500;margin-bottom:3px">${esc(l.title)}</div>
+            <div style="font-size:13px;color:var(--text3);margin-bottom:6px">${esc(l.course_title||'')}</div>
+            ${l.has_summary?`<div class="ai-label"><div class="ai-dot"></div>AI summary ready</div>`:'<div style="font-size:12px;color:var(--text3)">Summary pending...</div>'}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+            ${l.has_summary?`<button class="btn btn-sm" onclick="toggleSummary(${l.id})">View summary</button>`:''}
+            <a href="${esc(l.youtube_url)}" target="_blank" class="btn btn-sm btn-ghost" style="font-size:12px">▶ YouTube</a>
+          </div>
+        </div>
+        ${l.has_summary&&l.summary?`<div class="ai-box" id="sum-${l.id}" style="display:none;margin-top:12px"><div class="ai-label"><div class="ai-dot"></div>AI-generated summary</div><p style="font-size:14px;color:var(--text2);line-height:1.7">${esc(l.summary.summary_text)}</p></div>`:''}
+      </div>`).join('')||'<div class="empty"><div class="empty-icon">📝</div><p>No lessons yet.</p></div>';
+  }catch(e){el.innerHTML='<p style="color:var(--red);font-size:14px">Failed to load lessons.</p>'}
+}
+
+function toggleSummary(id){const el=document.getElementById('sum-'+id);if(el)el.style.display=el.style.display==='block'?'none':'block'}
+
+async function postLesson(){
+  clearErrs(['e-pc','e-pt','e-pu']);clearAlert('post-ok');clearAlert('post-err');
+  const course_id=document.getElementById('p-course').value;
+  const title=document.getElementById('p-title').value.trim();
+  const url=document.getElementById('p-url').value.trim();
+  let ok=true;
+  if(!course_id){setErr('e-pc');ok=false}
+  if(!title){setErr('e-pt');ok=false}
+  if(!YT_RE.test(url)){setErr('e-pu');ok=false}
+  if(!ok)return;
+  const btn=document.getElementById('post-btn');btn.disabled=true;btn.textContent='Posting...';
+  try{
+    const d=await api('POST','/lessons',{title,youtube_url:url,course_id:parseInt(course_id)});
+    setAlert('post-ok',`Lesson posted! AI summary pipeline triggered.`);
+    document.getElementById('p-title').value='';document.getElementById('p-url').value='';
+    loadTeacherOverview();loadTeacherLessons();
+  }catch(e){setAlert('post-err',e.data?.error||Object.values(e.data?.errors||{})[0]||'Failed to post lesson.')}
+  finally{btn.disabled=false;btn.textContent='Post lesson + Generate AI summary'}
+}
+
+/* ════════════════════════════════════════════════════════
+   TEACHER — MATERIALS
+════════════════════════════════════════════════════════ */
+function selType(t,btn){
+  SELECTED_MAT_TYPE=t;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('m-content-wrap').style.display=t==='link'?'none':'block';
+  document.getElementById('m-url-wrap').style.display=t==='link'?'block':'none';
+}
+
+async function loadLessonSelectForMaterials(){
+  try{
+    const d=await api('GET','/lessons');
+    const sel=document.getElementById('m-lesson');
+    sel.innerHTML='<option value="">Select lesson...</option>'+(d.lessons||[]).map(l=>`<option value="${l.id}">${esc(l.title)}</option>`).join('');
+  }catch(e){}
+}
+
+async function loadTeacherMaterials(){
+  const el=document.getElementById('t-matlist');
+  try{
+    const ld=await api('GET','/lessons');
+    const lessons=ld.lessons||[];
+    if(!lessons.length){el.innerHTML='<div class="empty"><div class="empty-icon">📎</div><p>No lessons yet — post a lesson first.</p></div>';return}
+    let html='';
+    for(const l of lessons){
+      const md=await api('GET','/materials/lesson/'+l.id);
+      const mats=md.materials||[];
+      if(!mats.length)continue;
+      html+=`<div class="sh" style="margin-top:16px">${esc(l.title)}</div>`;
+      html+=mats.map(m=>`
+        <div class="mat-card">
+          <div class="mat-hdr">
+            <div class="mat-icon" style="background:var(--surface2)">${matIcon(m.material_type)}</div>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:500">${esc(m.title)}</div>
+              <span class="badge ${matBadge(m.material_type)}" style="margin-top:4px">${m.material_type}</span>
+            </div>
+            <button class="btn btn-sm" style="color:var(--red);border-color:var(--red-border)" onclick="deleteMaterial(${m.id})">Delete</button>
+          </div>
+          ${m.content?`<div class="mat-body">${esc(m.content)}</div>`:''}
+          ${m.file_url?`<div style="padding:0 16px 14px"><a href="${esc(m.file_url)}" target="_blank" class="btn btn-sm btn-teal">🔗 Open link</a></div>`:''}
+        </div>`).join('');
+    }
+    el.innerHTML=html||'<div class="empty"><div class="empty-icon">📎</div><p>No materials posted yet.</p></div>';
+  }catch(e){el.innerHTML='<p style="color:var(--red);font-size:14px">Failed to load materials.</p>'}
+}
+
+async function postMaterial(){
+  clearErrs(['e-ml','e-mt','e-mc','e-mu']);clearAlert('mat-ok');clearAlert('mat-err');
+  const lesson_id=document.getElementById('m-lesson').value;
+  const title=document.getElementById('m-title').value.trim();
+  const content=document.getElementById('m-content').value.trim();
+  const file_url=document.getElementById('m-url').value.trim();
+  let ok=true;
+  if(!lesson_id){setErr('e-ml');ok=false}
+  if(!title){setErr('e-mt');ok=false}
+  if(SELECTED_MAT_TYPE!=='link'&&!content){setErr('e-mc');ok=false}
+  if(SELECTED_MAT_TYPE==='link'&&!file_url){setErr('e-mu');ok=false}
+  if(!ok)return;
+  const btn=document.getElementById('mat-btn');btn.disabled=true;btn.textContent='Posting...';
+  try{
+    await api('POST','/materials',{lesson_id:parseInt(lesson_id),title,material_type:SELECTED_MAT_TYPE,content,file_url});
+    setAlert('mat-ok','Material posted successfully!');
+    document.getElementById('m-title').value='';document.getElementById('m-content').value='';document.getElementById('m-url').value='';
+    loadTeacherMaterials();
+  }catch(e){setAlert('mat-err',e.data?.error||Object.values(e.data?.errors||{})[0]||'Failed to post material.')}
+  finally{btn.disabled=false;btn.textContent='Post material'}
+}
+
+async function deleteMaterial(id){
+  if(!confirm('Delete this material?'))return;
+  try{await api('DELETE','/materials/'+id);loadTeacherMaterials()}
+  catch(e){alert('Failed to delete.')}
+}
+
+/* ════════════════════════════════════════════════════════
+   STUDENT — COURSES
+════════════════════════════════════════════════════════ */
+async function loadStudentCourses(){
+  const el=document.getElementById('s-clist');
+  try{
+    const[cd,ld,pd]=await Promise.all([api('GET','/courses'),api('GET','/lessons'),api('GET','/progress').catch(()=>({progress:[]}))]);
+    const progressMap={};(pd.progress||[]).forEach(p=>{progressMap[p.lesson_id]=p.status});
+    const courses=cd.courses||[],lessons=ld.lessons||[];
+    let html='';
+    for(const c of courses){
+      const cl=lessons.filter(l=>l.course_id===c.id);if(!cl.length)continue;
+      html+=`<div style="margin-bottom:22px"><div class="sh">${esc(c.title)}</div><div class="card" style="padding:0 20px">`;
+      html+=cl.map(l=>{
+        const st=progressMap[l.id]||'not-started';
+        const bc=st==='completed'?'b-done':st==='in-progress'?'b-prog':'b-none';
+        const bt=st==='completed'?'Completed':st==='in-progress'?'In progress':'Not started';
+        return `<div class="lesson-row" onclick="openLesson(${l.id})">
+          <div style="flex:1">
+            <div class="lesson-title">${esc(l.title)}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+              ${l.has_summary?`<span style="font-size:12px;color:var(--purple);font-weight:500;display:flex;align-items:center;gap:3px"><span class="ai-dot"></span>Summary</span>`:''}
+              <span style="font-size:12px;color:var(--teal);font-weight:500">🎯 Quiz</span>
+            </div>
+          </div>
+          <span class="badge ${bc}">${bt}</span>
+        </div>`;
+      }).join('');
+      html+='</div></div>';
+    }
+    el.innerHTML=html||'<div class="empty"><div class="empty-icon">📚</div><p>No lessons yet.</p></div>';
+  }catch(e){el.innerHTML='<p style="color:var(--red);font-size:14px">Failed to load. Is Flask running?</p>'}
+}
+
+/* ════════════════════════════════════════════════════════
+   STUDENT — PROGRESS
+════════════════════════════════════════════════════════ */
+async function loadProgressStats(){
+  try{const d=await api('GET','/progress/stats');const s=d.stats||{};document.getElementById('p-done').textContent=s.completed??'—';document.getElementById('p-tot').textContent=s.total_lessons??'—';document.getElementById('p-pct').textContent=s.completion_rate!=null?s.completion_rate+'%':'—'}catch(e){}
+}
+async function loadProgressList(){
+  const el=document.getElementById('s-plist');
+  try{const d=await api('GET','/progress');const rows=d.progress||[];
+    el.innerHTML=rows.map(r=>{const bc=r.status==='completed'?'b-done':r.status==='in-progress'?'b-prog':'b-none';const bt=r.status==='completed'?'Completed':r.status==='in-progress'?'In progress':'Not started';
+      return `<div class="lesson-row" style="cursor:default"><div style="flex:1;font-size:15px;font-weight:500">${esc(r.lesson_title||'Lesson')}</div><span class="badge ${bc}">${bt}</span></div>`}).join('')
+      ||'<div class="empty" style="padding:24px"><p>No progress yet.</p></div>';}catch(e){}
+}
+
+/* ════════════════════════════════════════════════════════
+   STUDENT — OPEN LESSON
+════════════════════════════════════════════════════════ */
+async function openLesson(lessonId){
+  CURRENT_LESSON_ID=lessonId;CURRENT_QUIZ=null;CURRENT_ANSWERS={};
+  document.getElementById('l-content').innerHTML='<div class="loading-row"><div class="spinner"></div>Loading...</div>';
+  // reset tabs
+  document.querySelectorAll('#l-tabbar .tab').forEach((t,j)=>t.classList.toggle('on',j===0));
+  [0,1,2].forEach(j=>document.getElementById('lt-'+j).classList.toggle('on',j===0));
+  show('s-lesson');
+  try{await api('PUT','/progress/'+lessonId,{status:'in-progress'})}catch(e){}
+  try{
+    const d=await api('GET','/lessons/'+lessonId);
+    const l=d.lesson;
+    const ytMatch=(l.youtube_url||'').match(/(?:v=|youtu\.be\/)([\w\-]{11})/);
+    const ytId=ytMatch?ytMatch[1]:null;
+    let isDone=false;
+    try{const pd=await api('GET','/progress');isDone=(pd.progress||[]).find(r=>r.lesson_id===lessonId)?.status==='completed'}catch(e){}
+    document.getElementById('l-content').innerHTML=`
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:3px">${esc(l.course_title||'')}</div>
+      <div style="font-size:21px;font-weight:600;letter-spacing:-.3px;margin-bottom:18px">${esc(l.title)}</div>
+      ${ytId?`<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe></div><div style="text-align:right;margin-bottom:16px"><a href="${esc(l.youtube_url)}" target="_blank" style="font-size:13px;color:var(--text3)">Open on YouTube ↗</a></div>`:''}
+      ${l.summary?`<div class="ai-box"><div class="ai-label"><div class="ai-dot"></div>AI-Generated Study Summary</div><p style="font-size:14px;color:var(--text2);line-height:1.7">${esc(l.summary.summary_text)}</p></div>`:`<div class="card" style="margin-bottom:16px;color:var(--text3)"><div class="ai-label" style="opacity:.5"><div class="ai-dot"></div>AI summary</div><p style="font-size:14px;margin-top:5px">Summary not yet generated.</p></div>`}
+      <div id="mark-wrap">${isDone?'<button class="btn btn-success">✓ Completed</button>':`<button class="btn btn-primary" id="mark-btn" onclick="markDone(${lessonId})">Mark as completed</button>`}</div>`;
+  }catch(e){document.getElementById('l-content').innerHTML='<p style="color:var(--red)">Failed to load lesson.</p>'}
+}
+
+async function markDone(lessonId){
+  const btn=document.getElementById('mark-btn');if(btn){btn.disabled=true;btn.textContent='Saving...'}
+  try{await api('PUT','/progress/'+lessonId,{status:'completed'});document.getElementById('mark-wrap').innerHTML='<button class="btn btn-success">✓ Completed</button>';loadProgressStats();loadProgressList();loadStudentCourses()}
+  catch(e){if(btn){btn.disabled=false;btn.textContent='Mark as completed'}}
+}
+
+function backToStudent(){show('s-student');loadStudentCourses();loadProgressStats();loadProgressList()}
+
+/* ════════════════════════════════════════════════════════
+   QUIZ — PANEL (inside lesson view)
+════════════════════════════════════════════════════════ */
+async function loadQuizPanel(){
+  const el=document.getElementById('quiz-panel');
+  if(!CURRENT_LESSON_ID){el.innerHTML='<p>No lesson selected.</p>';return}
+  el.innerHTML='<div class="loading-row"><div class="spinner"></div>Loading quiz history...</div>';
+  try{
+    const hd=await api('GET','/quizzes/lesson/'+CURRENT_LESSON_ID+'/history');
+    const history=hd.history||[];
+    let html=`<div class="page-title" style="margin-bottom:4px">🎯 Quiz</div>
+      <p class="page-sub">Generate a new quiz from the AI summary. Each quiz has 5 fresh questions.</p>
+      <button class="btn btn-teal" id="gen-btn" onclick="generateQuiz()" style="margin-bottom:24px">✨ Generate new quiz</button>
+      <div id="quiz-area"></div>`;
+    if(history.length){
+      html+=`<div class="sh" style="margin-top:16px">Previous attempts (${history.length})</div><div class="card" style="padding:0 20px">`;
+      html+=history.map(q=>`
+        <div class="history-row">
+          <div style="flex:1"><div style="font-size:14px;font-weight:500">Quiz #${q.id}</div><div style="font-size:12px;color:var(--text3)">${new Date(q.created_at).toLocaleDateString()}</div></div>
+          ${scorePill(q.pct)}
+          <span style="font-size:14px;color:var(--text2)">${q.score}/${q.total_questions}</span>
+        </div>`).join('');
+      html+='</div>';
+    }
+    el.innerHTML=html;
+    if(CURRENT_QUIZ)renderQuiz(CURRENT_QUIZ);
+  }catch(e){el.innerHTML='<p style="color:var(--red)">Failed to load quiz panel.</p>'}
+}
+
+async function generateQuiz(){
+  const btn=document.getElementById('gen-btn');
+  const area=document.getElementById('quiz-area');
+  if(!btn||!area)return;
+  btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Gemini Pro is generating your quiz...';
+  area.innerHTML='<div class="loading-row"><div class="spinner"></div>Calling Gemini 1.5 Pro — generating 5 questions based on the AI summary...</div>';
+  try{
+    const d=await api('POST','/quizzes/generate/'+CURRENT_LESSON_ID);
+    CURRENT_QUIZ=d.quiz;CURRENT_ANSWERS={};
+    renderQuiz(CURRENT_QUIZ);
+    btn.innerHTML='✨ Generate another quiz';
+  }catch(e){
+    area.innerHTML=`<div class="alert alert-err on">${e.data?.error||'Failed to generate quiz. Make sure GEMINI_API_KEY is set in your .env file.'}</div>`;
+    btn.innerHTML='✨ Generate new quiz';
+  }finally{btn.disabled=false}
+}
+
+function renderQuiz(quiz){
+  const area=document.getElementById('quiz-area');if(!area)return;
+  if(quiz.submitted){
+    renderSubmittedQuiz(quiz);return;
+  }
+  let html=`<div class="quiz-wrap"><div class="quiz-hdr"><div class="quiz-hdr-title">Quiz #${quiz.id} — In Progress</div><span class="badge b-prog">5 questions</span></div>`;
+  quiz.questions.forEach(q=>{
+    html+=`<div class="q-card" id="qc-${q.question_no}">
+      <div class="q-num">Question ${q.question_no} of 5</div>
+      <div class="q-text">${esc(q.question_text)}</div>
+      <div class="options">
+        ${['A','B','C','D'].map(opt=>`
+          <button class="option" id="opt-${q.question_no}-${opt}" onclick="selectAnswer(${q.question_no},'${opt}')">
+            <span class="opt-key">${opt}</span>${esc(q['option_'+opt.toLowerCase()])}
+          </button>`).join('')}
+      </div>
+    </div>`;
+  });
+  html+=`<div class="quiz-actions">
+    <span style="font-size:13px;color:var(--text2)" id="ans-count">0 / 5 answered</span>
+    <button class="btn btn-primary" id="submit-btn" onclick="submitQuiz()" disabled>Submit quiz</button>
+  </div></div>`;
+  area.innerHTML=html;
+}
+
+function selectAnswer(qno,opt){
+  CURRENT_ANSWERS[qno]=opt;
+  ['A','B','C','D'].forEach(o=>{
+    const b=document.getElementById(`opt-${qno}-${o}`);
+    if(b){b.classList.remove('selected');if(o===opt)b.classList.add('selected')}
+  });
+  const cnt=Object.keys(CURRENT_ANSWERS).length;
+  const countEl=document.getElementById('ans-count');
+  if(countEl)countEl.textContent=`${cnt} / 5 answered`;
+  const submitBtn=document.getElementById('submit-btn');
+  if(submitBtn)submitBtn.disabled=cnt<5;
+}
+
+async function submitQuiz(){
+  const btn=document.getElementById('submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='Submitting...'}
+  try{
+    const d=await api('POST','/quizzes/'+CURRENT_QUIZ.id+'/submit',{answers:CURRENT_ANSWERS});
+    CURRENT_QUIZ=d.quiz;
+    renderSubmittedQuiz(CURRENT_QUIZ);
+    loadQuizStats();loadQuizHistory();
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='Submit quiz'}
+    alert(e.data?.error||'Failed to submit quiz.');
+  }
+}
+
+function renderSubmittedQuiz(quiz){
+  const area=document.getElementById('quiz-area');if(!area)return;
+  const pct=quiz.pct;
+  const emoji=pct===100?'🏆':pct>=80?'🎉':pct>=60?'👍':pct>=40?'📚':'💪';
+  let html=`<div class="quiz-wrap"><div class="quiz-hdr"><div class="quiz-hdr-title">Quiz #${quiz.id} — Completed</div>${scorePill(pct)}</div>
+    <div class="quiz-score-big">${emoji} ${quiz.score} / ${quiz.total_questions} correct</div>
+    <div class="quiz-score-sub">${pct}% — ${pct===100?'Perfect score!':pct>=80?'Excellent work!':pct>=60?'Good job!':pct>=40?'Keep studying!':'Review the lesson and try again!'}</div>`;
+  quiz.questions.forEach(q=>{
+    const studentAns=q.student_answer;
+    html+=`<div class="q-card">
+      <div class="q-num">Question ${q.question_no} of 5 ${q.is_correct?'✓':'✗'}</div>
+      <div class="q-text">${esc(q.question_text)}</div>
+      <div class="options">
+        ${['A','B','C','D'].map(opt=>{
+          let cls='option';
+          if(opt===q.correct_option)cls+=' correct';
+          else if(opt===studentAns&&!q.is_correct)cls+=' wrong';
+          else cls+=' neutral';
+          return `<button class="${cls}"><span class="opt-key">${opt}</span>${esc(q['option_'+opt.toLowerCase()])}</button>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  area.innerHTML=html;
+}
+
+/* ════════════════════════════════════════════════════════
+   QUIZ STATS & HISTORY (Progress tab)
+════════════════════════════════════════════════════════ */
+async function loadQuizStats(){
+  try{
+    const d=await api('GET','/quizzes/stats');const s=d.stats||{};
+    document.getElementById('q-taken').textContent=s.total_quizzes_taken??'—';
+    document.getElementById('q-avg').textContent=s.average_score_pct!=null?s.average_score_pct+'%':'—';
+  }catch(e){}
+}
+async function loadQuizHistory(){
+  const el=document.getElementById('q-history');
+  try{
+    // Get all lessons then quiz history per lesson
+    const ld=await api('GET','/lessons');const lessons=ld.lessons||[];
+    let allQuizzes=[];
+    for(const l of lessons){
+      try{const hd=await api('GET','/quizzes/lesson/'+l.id+'/history');(hd.history||[]).forEach(q=>{q._lessonTitle=l.title});allQuizzes=[...allQuizzes,...(hd.history||[])]}catch(e){}
+    }
+    allQuizzes.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+    if(!allQuizzes.length){el.innerHTML='<div class="empty" style="padding:24px"><p>No quizzes taken yet — open a lesson and generate one!</p></div>';
+      document.getElementById('q-best').textContent='—';return}
+    const best=Math.max(...allQuizzes.map(q=>q.pct));
+    document.getElementById('q-best').textContent=best+'%';
+    el.innerHTML=allQuizzes.map(q=>`
+      <div class="history-row">
+        <div style="flex:1"><div style="font-size:14px;font-weight:500">${esc(q._lessonTitle||q.lesson_title||'Lesson')}</div><div style="font-size:12px;color:var(--text3)">${new Date(q.created_at).toLocaleDateString()}</div></div>
+        ${scorePill(q.pct)}
+        <span style="font-size:14px;font-weight:500;color:var(--text2)">${q.score}/${q.total_questions}</span>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<p style="color:var(--red);font-size:14px">Failed to load history.</p>'}
+}
+
+/* ════════════════════════════════════════════════════════
+   MATERIALS PANEL (inside lesson view)
+════════════════════════════════════════════════════════ */
+async function loadMaterialsPanel(){
+  const el=document.getElementById('mat-panel');
+  if(!CURRENT_LESSON_ID){el.innerHTML='<p>No lesson selected.</p>';return}
+  el.innerHTML='<div class="loading-row"><div class="spinner"></div>Loading materials...</div>';
+  try{
+    const d=await api('GET','/materials/lesson/'+CURRENT_LESSON_ID);
+    const mats=d.materials||[];
+    if(!mats.length){el.innerHTML=`<div class="page-title" style="margin-bottom:16px">📎 Materials</div><div class="empty"><div class="empty-icon">📂</div><p>No materials posted for this lesson yet.</p></div>`;return}
+    const byType={};mats.forEach(m=>{if(!byType[m.material_type])byType[m.material_type]=[];byType[m.material_type].push(m)});
+    let html=`<div class="page-title" style="margin-bottom:4px">📎 Materials</div><p class="page-sub">Resources posted by your teacher for this lesson.</p>`;
+    for(const[type,items]of Object.entries(byType)){
+      html+=`<div class="sh" style="margin-top:4px">${matIcon(type)} ${type.charAt(0).toUpperCase()+type.slice(1)}</div>`;
+      html+=items.map(m=>`
+        <div class="mat-card" style="margin-bottom:10px">
+          <div class="mat-hdr">
+            <div class="mat-icon" style="background:var(--surface2)">${matIcon(m.material_type)}</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:500">${esc(m.title)}</div><div style="font-size:12px;color:var(--text3);margin-top:2px">${new Date(m.created_at).toLocaleDateString()}</div></div>
+            ${m.file_url?`<a href="${esc(m.file_url)}" target="_blank" class="btn btn-sm btn-teal">Open ↗</a>`:''}
+          </div>
+          ${m.content?`<div class="mat-body">${esc(m.content)}</div>`:''}
+        </div>`).join('');
+    }
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<p style="color:var(--red)">Failed to load materials.</p>'}
+}
+
+/* Enter key on login */
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  if(document.getElementById('s-login').classList.contains('active'))doLogin();
+  if(document.getElementById('s-register').classList.contains('active'))doRegister();
+});
+</script>
+</body>
+</html>
