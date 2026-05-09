@@ -2,7 +2,7 @@ from datetime import datetime
 from extensions import db
 
 
-# ── Existing models (unchanged) ───────────────────────────────────────────
+# models 
 
 class User(db.Model):
     __tablename__ = "Users"
@@ -89,7 +89,7 @@ class Progress(db.Model):
                 "status": self.status, "updated_at": self.updated_at.isoformat()}
 
 
-# ── NEW: Lesson Materials ─────────────────────────────────────────────────
+#  Lesson Materials
 
 class LessonMaterial(db.Model):
     __tablename__ = "Lesson_Materials"
@@ -117,7 +117,7 @@ class LessonMaterial(db.Model):
         }
 
 
-# ── NEW: Quizzes ──────────────────────────────────────────────────────────
+#  Quizzes 
 
 class Quiz(db.Model):
     __tablename__ = "Quizzes"
@@ -150,8 +150,7 @@ class Quiz(db.Model):
         return data
 
 
-# ── NEW: Quiz Questions ───────────────────────────────────────────────────
-
+#  Quiz Questions 
 class QuizQuestion(db.Model):
     __tablename__ = "Quiz_Questions"
     id              = db.Column(db.Integer, primary_key=True)
